@@ -1,3 +1,4 @@
+// app/(auth)/sign-up.tsx
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, router } from "expo-router";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
 import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
-// import { fetchAPI } from "@/lib/fetch";
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -33,17 +33,12 @@ const SignUp = () => {
         password: form.password,
       });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setVerification({
-        ...verification,
-        state: "pending",
-      });
+      setVerification({ ...verification, state: "pending" });
     } catch (err: any) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.log(JSON.stringify(err, null, 2));
-      Alert.alert("Error", err.errors[0].longMessage);
+      Alert.alert("Error", err.errors?.[0]?.longMessage ?? "Something went wrong.");
     }
   };
+
   const onPressVerify = async () => {
     if (!isLoaded) return;
     try {
@@ -51,19 +46,8 @@ const SignUp = () => {
         code: verification.code,
       });
       if (completeSignUp.status === "complete") {
-        // await fetchAPI("/(api)/user", {
-        //   method: "POST",
-        //   body: JSON.stringify({
-        //     name: form.name,
-        //     email: form.email,
-        //     clerkId: completeSignUp.createdUserId,
-        //   }),
-        // });
         await setActive({ session: completeSignUp.createdSessionId });
-        setVerification({
-          ...verification,
-          state: "success",
-        });
+        setVerification({ ...verification, state: "success" });
       } else {
         setVerification({
           ...verification,
@@ -72,35 +56,40 @@ const SignUp = () => {
         });
       }
     } catch (err: any) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       setVerification({
         ...verification,
-        error: err.errors[0].longMessage,
+        error: err.errors?.[0]?.longMessage ?? "Verification failed.",
         state: "failed",
       });
     }
   };
+
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 bg-white">
+        {/* Header */}
         <View className="relative w-full h-[250px]">
-          <Image source={images.signUpCar} className="z-0 w-full h-[250px]" />
+          <Image
+            source={images.signUpCar}
+            className="w-full h-[250px]"
+            resizeMode="cover"
+          />
           <Text className="text-2xl text-black font-JakartaSemiBold absolute bottom-5 left-5">
-            Create Your Account
+            Create your account
           </Text>
         </View>
+
         <View className="p-5">
           <InputField
             label="Name"
-            placeholder="Enter name"
+            placeholder="Enter your name"
             icon={icons.person}
             value={form.name}
             onChangeText={(value) => setForm({ ...form, name: value })}
           />
           <InputField
             label="Email"
-            placeholder="Enter email"
+            placeholder="Enter your email"
             icon={icons.email}
             textContentType="emailAddress"
             value={form.email}
@@ -108,9 +97,9 @@ const SignUp = () => {
           />
           <InputField
             label="Password"
-            placeholder="Enter password"
+            placeholder="Enter your password"
             icon={icons.lock}
-            secureTextEntry={false}
+            secureTextEntry
             textContentType="password"
             value={form.password}
             onChangeText={(value) => setForm({ ...form, password: value })}
@@ -129,15 +118,12 @@ const SignUp = () => {
             <Text className="text-primary-500">Log In</Text>
           </Link>
         </View>
+
+        {/* Verification modal */}
         <ReactNativeModal
           isVisible={verification.state === "pending"}
-          // onBackdropPress={() =>
-          //   setVerification({ ...verification, state: "default" })
-          // }
           onModalHide={() => {
-            if (verification.state === "success") {
-              setShowSuccessModal(true);
-            }
+            if (verification.state === "success") setShowSuccessModal(true);
           }}
         >
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
@@ -148,14 +134,12 @@ const SignUp = () => {
               We've sent a verification code to {form.email}.
             </Text>
             <InputField
-              label={"Code"}
+              label="Code"
               icon={icons.lock}
-              placeholder={"12345"}
+              placeholder="12345"
               value={verification.code}
               keyboardType="numeric"
-              onChangeText={(code) =>
-                setVerification({ ...verification, code })
-              }
+              onChangeText={(code) => setVerification({ ...verification, code })}
             />
             {verification.error && (
               <Text className="text-red-500 text-sm mt-1">
@@ -169,6 +153,8 @@ const SignUp = () => {
             />
           </View>
         </ReactNativeModal>
+
+        {/* Success modal */}
         <ReactNativeModal isVisible={showSuccessModal}>
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
             <Image
@@ -182,8 +168,8 @@ const SignUp = () => {
               You have successfully verified your account.
             </Text>
             <CustomButton
-              title="Browse Home"
-              onPress={() => router.push(`/(root)/(tabs)/home`)}
+              title="Start delivering"
+              onPress={() => router.replace("/(root)/(tabs)/jobs")}  // ← fixed
               className="mt-5"
             />
           </View>
@@ -192,4 +178,5 @@ const SignUp = () => {
     </ScrollView>
   );
 };
+
 export default SignUp;

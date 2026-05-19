@@ -1,15 +1,26 @@
+// lib/auth.ts
 import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 
+const webStorage = {
+  async getToken(key: string) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {}
+  },
+};
 
-export const tokenCache = {
+const nativeStorage = {
   async getToken(key: string) {
     try {
       const item = await SecureStore.getItemAsync(key);
-      if (item) {
-        console.log(`${key} was used 🔐 \n`);
-      } else {
-        console.log("No values stored under key: " + key);
-      }
       return item;
     } catch (error) {
       console.error("SecureStore get item error: ", error);
@@ -20,8 +31,8 @@ export const tokenCache = {
   async saveToken(key: string, value: string) {
     try {
       return SecureStore.setItemAsync(key, value);
-    } catch (err) {
-      return;
-    }
+    } catch {}
   },
 };
+
+export const tokenCache = Platform.OS === "web" ? webStorage : nativeStorage;
