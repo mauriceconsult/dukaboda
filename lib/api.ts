@@ -1,15 +1,8 @@
-// lib/api.ts
-//
-// All calls go to the Vendly backend.
-// EXPO_PUBLIC_API_URL = https://vendly.maxnovate.com
+// lib/api.ts — updated with vehicleType in registerRider
 
-import { useAuth } from "@clerk/clerk-expo";
 import type { DeliveryJob, StatusUpdatePayload, Rider } from "@/types/delivery";
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? "https://vendly.maxnovate.com";
-
-// ── Auth header helper ────────────────────────────────────────────────────────
-// Call getToken() from Clerk inside each request so the token is always fresh.
 
 async function request<T>(
   path: string,
@@ -37,7 +30,7 @@ async function request<T>(
 
 export async function registerRider(
   token: string,
-  data: { name: string; phone: string; email: string },
+  data: { name: string; phone: string; email: string; vehicleType: string },
 ): Promise<Rider> {
   return request<Rider>("/api/riders", token, {
     method: "POST",
@@ -61,17 +54,14 @@ export async function updateRiderStatus(
 
 // ── Job queue ─────────────────────────────────────────────────────────────────
 
-// Available jobs — rider sees these and can accept one
 export async function getAvailableJobs(token: string): Promise<DeliveryJob[]> {
   return request<DeliveryJob[]>("/api/delivery/jobs?status=pending", token);
 }
 
-// Jobs assigned to this rider
 export async function getMyJobs(token: string): Promise<DeliveryJob[]> {
   return request<DeliveryJob[]>("/api/delivery/jobs/mine", token);
 }
 
-// Accept a job — assigns it to this rider
 export async function acceptJob(
   token: string,
   jobId: string,
@@ -81,7 +71,6 @@ export async function acceptJob(
   });
 }
 
-// Update delivery status (picking_up → picked_up → delivered etc.)
 export async function updateJobStatus(
   token: string,
   jobId: string,
