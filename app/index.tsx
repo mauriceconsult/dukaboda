@@ -1,7 +1,3 @@
-// app/index.tsx
-//
-// Entry point — routes based on auth + rider registration state.
-
 import { useAuth } from "@clerk/clerk-expo";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
@@ -15,15 +11,20 @@ const Page = () => {
   const [riderState, setRiderState] = useState<RiderState>("loading");
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) {
-      setRiderState("loading");
+    // Only check rider if signed in
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setRiderState("not_registered"); // ← unblock the render
       return;
     }
 
     const checkRider = async () => {
       try {
         const token = await getToken();
-        if (!token) return;
+        if (!token) {
+          setRiderState("not_registered");
+          return;
+        }
         const rider = await getMyProfile(token);
         setRiderState(rider.isApproved ? "approved" : "pending");
       } catch {
@@ -34,18 +35,29 @@ const Page = () => {
     checkRider();
   }, [isLoaded, isSignedIn, getToken]);
 
-  if (!isLoaded || (isSignedIn && riderState === "loading")) {
+  // Show spinner only while Clerk is loading OR while checking rider profile
+  if (!isLoaded || riderState === "loading") {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      >
         <ActivityIndicator size="large" color="#0286ff" />
       </View>
     );
   }
 
+  // Not signed in → welcome screen
   if (!isSignedIn) return <Redirect href="/(auth)/welcome" />;
 
-  if (riderState === "not_registered") return <Redirect href="/(root)/onboarding" />;
-  if (riderState === "pending")        return <Redirect href="/(root)/pending" />;
+  // Signed in — route by rider state
+  if (riderState === "not_registered")
+    return <Redirect href="/(root)/onboarding" />;
+  if (riderState === "pending") return <Redirect href="/(root)/pending" />;
   return <Redirect href="/(root)/(tabs)/jobs" />;
 };
 
