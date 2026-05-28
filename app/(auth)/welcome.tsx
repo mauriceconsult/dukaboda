@@ -22,7 +22,7 @@ const Onboarding = () => {
 
   const goNext = () => {
     if (isLastSlide) {
-      router.replace("/sign-up");      // ← fixed: no group prefix
+      router.replace("/(root)/onboarding");      // ← fixed: no group prefix
     } else {
       const nextIndex = activeIndex + 1;
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
