@@ -7,11 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "dukaboda",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0286ff"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.maxnovate.dukaboda"
@@ -19,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0286ff"
       },
       "package": "com.maxnovate.dukaboda"
     },
