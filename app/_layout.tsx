@@ -10,7 +10,7 @@ import { tokenCache } from "@/lib/auth";
 
 SplashScreen.preventAutoHideAsync();
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 if (!publishableKey) {
   throw new Error(
@@ -38,7 +38,7 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
       <ClerkLoaded>
         <Slot />
       </ClerkLoaded>
