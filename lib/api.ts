@@ -2,7 +2,11 @@
 
 import type { DeliveryJob, StatusUpdatePayload, Rider } from "@/types/delivery";
 
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? "https://vendly.maxnovate.com";
+const BASE = process.env.EXPO_PUBLIC_API_URL;
+
+if (!BASE) {
+  throw new Error("Missing EXPO_PUBLIC_API_URL");
+}
 
 async function request<T>(
   path: string,
@@ -17,13 +21,22 @@ async function request<T>(
       ...(options.headers ?? {}),
     },
   });
+    const text = await res.text(); // 👈 ALWAYS read as text first
+
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("❌ Non-JSON response:", text);
+      throw new Error("Server returned invalid response (not JSON)");
+    }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message ?? `Request failed: ${res.status}`);
   }
 
-  return res.json() as Promise<T>;
+  return data as T;
 }
 
 // ── Rider registration / profile ──────────────────────────────────────────────
