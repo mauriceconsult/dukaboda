@@ -201,7 +201,7 @@ const SignUp = () => {
               </Text>
               <CustomButton
                 title="Start delivering"
-                onPress={() => router.replace("/(root)/(tabs)/jobs")}
+                onPress={() => router.replace("/")}
                 className="mt-5"
               />
             </View>
