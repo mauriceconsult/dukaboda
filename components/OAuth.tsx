@@ -11,11 +11,11 @@ export default function OAuth() {
   const handleGoogleSignIn = async () => {
     try {
       const { createdSessionId, setActive } = await startOAuthFlow({
-        redirectUrl: Linking.createURL("/(root)/(tabs)/jobs", { scheme: "dukaboda" }),
+        redirectUrl: Linking.createURL("/", { scheme: "dukaboda" }),
       });
       if (createdSessionId) {
         await setActive!({ session: createdSessionId });
-        router.replace("/(root)/(tabs)/jobs");
+        router.replace("/");
       }
     } catch (err: any) {
       Alert.alert("Google sign in failed", err.message ?? "Please try again.");
