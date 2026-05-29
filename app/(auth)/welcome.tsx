@@ -22,7 +22,7 @@ const Onboarding = () => {
 
   const goNext = () => {
     if (isLastSlide) {
-      router.replace("/(root)/onboarding");      // ← fixed: no group prefix
+      router.replace("/(auth)/sign-up");     
     } else {
       const nextIndex = activeIndex + 1;
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
@@ -33,7 +33,7 @@ const Onboarding = () => {
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-between">
       <TouchableOpacity
-        onPress={() => router.replace("/sign-up")}  // ← fixed
+        onPress={() => router.replace("/sign-up")}  
         className="w-full flex justify-end items-end p-5"
       >
         <Text className="text-black text-md font-JakartaBold">Skip</Text>
