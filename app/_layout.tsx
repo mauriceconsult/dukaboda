@@ -3,22 +3,13 @@ import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import "react-native-reanimated";
-import { LogBox } from "react-native";
-import "../global.css";
+import { LogBox, View, Text } from "react-native";
 import { tokenCache } from "@/lib/auth";
 
 SplashScreen.preventAutoHideAsync();
+LogBox.ignoreLogs(["Clerk:"]);
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-if (!publishableKey) {
-  throw new Error(
-    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env",
-  );
-}
-
-LogBox.ignoreLogs(["Clerk:"]);
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -37,8 +28,46 @@ export default function RootLayout() {
 
   if (!loaded) return null;
 
+  // Visible error instead of silent crash
+  if (!publishableKey) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#0286ff",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            fontSize: 18,
+            fontWeight: "bold",
+            textAlign: "center",
+            marginBottom: 8,
+          }}
+        >
+          Configuration Error
+        </Text>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 13,
+            textAlign: "center",
+            opacity: 0.8,
+          }}
+        >
+          Missing authentication key.{"\n"}Please reinstall the app or contact
+          support@maxnovate.com
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey!}>
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
       <ClerkLoaded>
         <Slot />
       </ClerkLoaded>
