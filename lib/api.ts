@@ -103,3 +103,19 @@ export async function getJobHistory(token: string): Promise<DeliveryJob[]> {
     token,
   );
 }
+
+// ── Documents ─────────────────────────────────────────────────────────────────
+
+export async function downloadStudioStrategy(token: string) {
+  const res = await fetch(`${BASE}/api/documents/studio-strategy`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to download document");
+  }
+
+  return res.blob();
+}
