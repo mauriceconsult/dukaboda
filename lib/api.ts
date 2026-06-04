@@ -21,22 +21,29 @@ async function request<T>(
       ...(options.headers ?? {}),
     },
   });
-    const text = await res.text(); // 👈 ALWAYS read as text first
 
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      console.error("❌ Non-JSON response:", text);
-      throw new Error("Server returned invalid response (not JSON)");
-    }
+const text = await res.text();
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? `Request failed: ${res.status}`);
-  }
+let data: any = null;
 
-  return data as T;
+try {
+  data = text ? JSON.parse(text) : null;
+} catch {
+  console.error("STATUS:", res.status);
+  console.error("URL:", `${BASE}${path}`);
+  console.error("BODY:", text);
+  console.log("API URL:", BASE);
+
+  throw new Error(`Server returned invalid response (${res.status})`);
+}
+
+if (!res.ok) {
+  throw new Error(
+    data?.error ?? data?.message ?? `Request failed: ${res.status}`,
+  );
+}
+
+return data as T;
 }
 
 // ── Rider registration / profile ──────────────────────────────────────────────
