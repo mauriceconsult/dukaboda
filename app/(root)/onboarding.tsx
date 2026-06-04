@@ -44,8 +44,8 @@ const VEHICLES: { type: VehicleType; icon: string; label: string; description: s
 ];
 
 export default function OnboardingScreen() {
-  const { getToken } = useAuth();
-  const { user }     = useUser();
+  const { getToken, userId } = useAuth();
+  const { user } = useUser();
 
   const [name,        setName]        = useState(
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ?? ""
@@ -72,17 +72,21 @@ export default function OnboardingScreen() {
       // Format phone to E.164 if needed
       const formatted = phone.startsWith("+")
         ? phone
-        : `+256${phone.replace(/^0/, "")}`;
-      
+        : `+256${phone.replace(/^0/, "")}`;     
+
       console.log("TOKEN EXISTS:", !!token);
       console.log("TOKEN:", token?.slice(0, 50));
 
-      await registerRider(token, {
-        name:        name.trim(),
-        phone:       formatted,
-        email:       user?.primaryEmailAddress?.emailAddress ?? "",
-        vehicleType: vehicle,
-      });
+      await registerRider(
+        token,
+        {
+          name: name.trim(),
+          phone: formatted,
+          email: user?.primaryEmailAddress?.emailAddress ?? "",
+          vehicleType: vehicle,
+        },
+        userId!,
+      ); // ← pass clerkId
 
       router.replace("/(root)/pending");
     } catch (err: any) {

@@ -51,25 +51,22 @@ return data as T;
 export async function registerRider(
   token: string,
   data: { name: string; phone: string; email: string; vehicleType: string },
+  clerkId: string, // ← add this
 ): Promise<Rider> {
-  return request<Rider>("/api/riders", token, {
+  const res = await fetch(`${BASE}/api/riders`, {
     method: "POST",
-    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
+    },
+    body: JSON.stringify({ ...data, clerkId }), // ← send clerkId in body
   });
-}
 
-export async function getMyProfile(token: string): Promise<Rider> {
-  return request<Rider>("/api/riders/me", token);
-}
-
-export async function updateRiderStatus(
-  token: string,
-  isActive: boolean,
-): Promise<Rider> {
-  return request<Rider>("/api/riders/me/status", token, {
-    method: "PATCH",
-    body: JSON.stringify({ isActive }),
-  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message ?? `Request failed: ${res.status}`);
+  }
+  return res.json();
 }
 
 // ── Job queue ─────────────────────────────────────────────────────────────────

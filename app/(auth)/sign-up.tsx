@@ -55,30 +55,46 @@ const SignUp = () => {
     }
   };
 
-  const onPressVerify = async () => {
-    if (!isLoaded) return;
-    setLoading(true);
-    try {
-      const result = await signUp.attemptEmailAddressVerification({
-        code: verification.code,
-      });
-   if (result.status === "complete") {
-     await setActive({
-       session: result.createdSessionId,
+ const onPressVerify = async () => {
+   if (!isLoaded) return;
+
+   setLoading(true);
+
+   try {
+     const result = await signUp.attemptEmailAddressVerification({
+       code: verification.code,
      });
 
-     setShowSuccessModal(true);
+     if (result.status === "complete") {
+       await setActive({
+         session: result.createdSessionId,
+       });
+
+       // Hide verification modal
+       setVerification({
+         ...verification,
+         state: "success",
+       });
+
+       // Show success modal
+       setShowSuccessModal(true);
+     } else {
+       setVerification({
+         ...verification,
+         error: "Verification failed.",
+         state: "failed",
+       });
+     }
+   } catch (err: any) {
+     setVerification({
+       ...verification,
+       error: err.errors?.[0]?.longMessage ?? "Verification failed.",
+       state: "failed",
+     });
+   } finally {
+     setLoading(false);
    }
-    } catch (err: any) {
-      setVerification({
-        ...verification,
-        error: err.errors?.[0]?.longMessage ?? "Verification failed.",
-        state: "failed",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+ };
 
   return (
     <KeyboardAvoidingView
