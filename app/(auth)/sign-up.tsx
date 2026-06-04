@@ -62,16 +62,13 @@ const SignUp = () => {
       const result = await signUp.attemptEmailAddressVerification({
         code: verification.code,
       });
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        setVerification({ ...verification, state: "success" });
-      } else {
-        setVerification({
-          ...verification,
-          error: "Verification failed.",
-          state: "failed",
-        });
-      }
+   if (result.status === "complete") {
+     await setActive({
+       session: result.createdSessionId,
+     });
+
+     setShowSuccessModal(true);
+   }
     } catch (err: any) {
       setVerification({
         ...verification,

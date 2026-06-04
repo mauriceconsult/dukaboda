@@ -73,6 +73,9 @@ export default function OnboardingScreen() {
       const formatted = phone.startsWith("+")
         ? phone
         : `+256${phone.replace(/^0/, "")}`;
+      
+      console.log("TOKEN EXISTS:", !!token);
+      console.log("TOKEN:", token?.slice(0, 50));
 
       await registerRider(token, {
         name:        name.trim(),
