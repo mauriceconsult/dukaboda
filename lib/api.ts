@@ -8,6 +8,21 @@ if (!BASE) {
   throw new Error("Missing EXPO_PUBLIC_API_URL");
 }
 
+// Add to lib/api.ts
+
+export async function getMyProfile(token: string): Promise<Rider> {
+  return request<Rider>("/api/riders/me", token);
+}
+
+export async function updateRiderStatus(
+  token: string,
+  isActive: boolean,
+): Promise<Rider> {
+  return request<Rider>("/api/riders/me/status", token, {
+    method: "PATCH",
+    body: JSON.stringify({ isActive }),
+  });
+}
 async function request<T>(
   path: string,
   token: string,
