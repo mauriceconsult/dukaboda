@@ -64,9 +64,13 @@ return data as T;
 // ── Rider registration / profile ──────────────────────────────────────────────
 
 export async function registerRider(
-  token: string,
-  data: { name: string; phone: string; email: string; vehicleType: string },
-  clerkId: string, // ← add this
+  data: {
+    name: string;
+    phone: string;
+    email: string;
+    vehicleType: string;
+  },
+  clerkId: string,
 ): Promise<Rider> {
   const res = await fetch(`${BASE}/api/riders`, {
     method: "POST",
@@ -74,7 +78,10 @@ export async function registerRider(
       "Content-Type": "application/json",
       "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
     },
-    body: JSON.stringify({ ...data, clerkId }), // ← send clerkId in body
+    body: JSON.stringify({
+      ...data,
+      clerkId,
+    }),
   });
 
   if (!res.ok) {

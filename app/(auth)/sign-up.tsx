@@ -70,6 +70,9 @@ const SignUp = () => {
          session: result.createdSessionId,
        });
 
+       // Give Clerk time to hydrate session state
+       await new Promise((resolve) => setTimeout(resolve, 1000));
+
        // Hide verification modal
        setVerification({
          ...verification,
@@ -214,7 +217,10 @@ const SignUp = () => {
               </Text>
               <CustomButton
                 title="Start delivering"
-                onPress={() => router.replace("/")}
+                onPress={() => {
+                  setShowSuccessModal(false);
+                  router.replace("/");
+                }}
                 className="mt-5"
               />
             </View>

@@ -44,7 +44,7 @@ const VEHICLES: { type: VehicleType; icon: string; label: string; description: s
 ];
 
 export default function OnboardingScreen() {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
 
   const [name,        setName]        = useState(
@@ -53,8 +53,6 @@ export default function OnboardingScreen() {
   const [phone,       setPhone]       = useState("");
   const [vehicle,     setVehicle]     = useState<VehicleType>("motorcycle");
   const [submitting,  setSubmitting]  = useState(false);
-
-  
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -65,10 +63,23 @@ export default function OnboardingScreen() {
       Alert.alert("Required", "Please enter a valid phone number.");
       return;
     }
+    if (!isLoaded || !isSignedIn || !userId) {
+      Alert.alert(
+        "Please wait",
+        "Your account is still being initialized. Try again in a moment.",
+      );
+      return;
+    }
 
     try {
       setSubmitting(true);
       const token = await getToken();
+      console.log({
+        isLoaded,
+        isSignedIn,
+        userId,
+        hasToken: !!token,
+      });
       if (!token) throw new Error("Not authenticated");
 
       // Format phone to E.164 if needed
@@ -89,38 +100,41 @@ export default function OnboardingScreen() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
             "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
+            Authorization: `Bearer ${token}`,
+            
           },
+          
           body: JSON.stringify({
             clerkId: userId,
+            tokenExists: !!token,
           }),
         },
       );
-
-      const debugText = await debugRes.text();
-
-      console.log("DEBUG STATUS:", debugRes.status);
-      console.log("DEBUG BODY:", debugText);
-
-      Alert.alert(
-        `Debug (${debugRes.status})`,
-        debugText.length > 500 ? debugText.substring(0, 500) : debugText,
+      console.log(
+        "API KEY EXISTS:",
+        !!process.env.EXPO_PUBLIC_PLATFORM_API_KEY,
       );
 
-      // Uncomment this line if you want to stop after debugging.
+      const debug = await debugRes.json();
+
+      console.log("DEBUG STATUS:", debugRes.status);
+      console.log("DEBUG BODY:", debug);
+
+      Alert.alert("Debug", JSON.stringify(debug, null, 2));
+
+      // Stop here temporarily
       // return;
 
-      await registerRider(
-        token,
-        {
-          name: name.trim(),
-          phone: formatted,
-          email: user?.primaryEmailAddress?.emailAddress ?? "",
-          vehicleType: vehicle,
-        },
-        userId!,
-      ); // ← pass clerkId
+    await registerRider(
+      {
+        name: name.trim(),
+        phone: formatted,
+        email: user?.primaryEmailAddress?.emailAddress ?? "",
+        vehicleType: vehicle,
+      },
+      userId,
+    );
 
       router.replace("/(root)/pending");
     } catch (err: any) {

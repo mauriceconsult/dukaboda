@@ -15,8 +15,10 @@ const Page = () => {
       // Wait for Clerk to initialize
       if (!isLoaded) return;
 
+      const token = await getToken();
+
       // Not signed in → show welcome
-      if (!isSignedIn) {
+      if (!isSignedIn || !token) {
         setRiderState("not_registered");
         return;
       }
@@ -43,7 +45,7 @@ const Page = () => {
     // Small delay allows Clerk session to settle after sign-up
      const timer = setTimeout(() => {
        checkRider();
-     }, 500);
+     }, 1000);
 
     return () => clearTimeout(timer);
   }, [isLoaded, isSignedIn, getToken]);
