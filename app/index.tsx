@@ -11,31 +11,43 @@ const Page = () => {
   const [riderState, setRiderState] = useState<RiderState>("loading");
 
   useEffect(() => {
-    // Only check rider if signed in
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setRiderState("not_registered"); // ← unblock the render
-      return;
-    }
-
     const checkRider = async () => {
+      // Wait for Clerk to initialize
+      if (!isLoaded) return;
+
+      // Not signed in → show welcome
+      if (!isSignedIn) {
+        setRiderState("not_registered");
+        return;
+      }
+      
+
       try {
         const token = await getToken();
+
+        // Session not fully ready yet
         if (!token) {
           setRiderState("not_registered");
           return;
         }
+
         const rider = await getMyProfile(token);
+
         setRiderState(rider.isApproved ? "approved" : "pending");
-      } catch {
+      } catch (error) {
+        console.log("getMyProfile failed:", error);
         setRiderState("not_registered");
       }
     };
 
-    checkRider();
+    // Small delay allows Clerk session to settle after sign-up
+     const timer = setTimeout(() => {
+       checkRider();
+     }, 500);
+
+    return () => clearTimeout(timer);
   }, [isLoaded, isSignedIn, getToken]);
 
-  // Show spinner only while Clerk is loading OR while checking rider profile
   if (!isLoaded || riderState === "loading") {
     return (
       <View
@@ -51,13 +63,18 @@ const Page = () => {
     );
   }
 
-  // Not signed in → welcome screen
-  if (!isSignedIn) return <Redirect href="/(auth)/welcome" />;
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/welcome" />;
+  }
 
-  // Signed in — route by rider state
-  if (riderState === "not_registered")
+  if (riderState === "not_registered") {
     return <Redirect href="/(root)/onboarding" />;
-  if (riderState === "pending") return <Redirect href="/(root)/pending" />;
+  }
+
+  if (riderState === "pending") {
+    return <Redirect href="/(root)/pending" />;
+  }
+
   return <Redirect href="/(root)/(tabs)/jobs" />;
 };
 

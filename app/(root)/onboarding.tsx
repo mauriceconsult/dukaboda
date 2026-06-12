@@ -54,6 +54,8 @@ export default function OnboardingScreen() {
   const [vehicle,     setVehicle]     = useState<VehicleType>("motorcycle");
   const [submitting,  setSubmitting]  = useState(false);
 
+  
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       Alert.alert("Required", "Please enter your full name.");
@@ -72,10 +74,42 @@ export default function OnboardingScreen() {
       // Format phone to E.164 if needed
       const formatted = phone.startsWith("+")
         ? phone
-        : `+256${phone.replace(/^0/, "")}`;     
+        : `+256${phone.replace(/^0/, "")}`;
 
       console.log("TOKEN EXISTS:", !!token);
       console.log("TOKEN:", token?.slice(0, 50));
+      console.log("USER ID:", userId);
+
+      // ─────────────────────────────────────────────
+      // DEBUG TOKEN ENDPOINT
+      // ─────────────────────────────────────────────
+      const debugRes = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/api/debug/token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
+          },
+          body: JSON.stringify({
+            clerkId: userId,
+          }),
+        },
+      );
+
+      const debugText = await debugRes.text();
+
+      console.log("DEBUG STATUS:", debugRes.status);
+      console.log("DEBUG BODY:", debugText);
+
+      Alert.alert(
+        `Debug (${debugRes.status})`,
+        debugText.length > 500 ? debugText.substring(0, 500) : debugText,
+      );
+
+      // Uncomment this line if you want to stop after debugging.
+      // return;
 
       await registerRider(
         token,
