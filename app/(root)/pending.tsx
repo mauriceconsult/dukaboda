@@ -13,15 +13,15 @@ import { getMyProfile } from "@/lib/api";
 const POLL_MS = 15_000;
 
 export default function PendingScreen() {
-  const { getToken } = useAuth();
+  const { userId } = useAuth();
   const intervalRef  = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const check = async () => {
       try {
-        const token = await getToken();
-        if (!token) return;
-        const rider = await getMyProfile(token);
+        const rider = await getMyProfile(userId!);
+        if (!userId) return;
+      
         if (rider.isApproved) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           router.replace("/(root)/(tabs)/jobs");
@@ -37,7 +37,7 @@ export default function PendingScreen() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [getToken]);
+  }, [userId]);
 
   return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center px-8">

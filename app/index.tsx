@@ -7,7 +7,7 @@ import { getMyProfile } from "@/lib/api";
 type RiderState = "loading" | "not_registered" | "pending" | "approved";
 
 const Page = () => {
-  const { isSignedIn, isLoaded, getToken } = useAuth();
+  const { isSignedIn, isLoaded, userId } = useAuth();
   const [riderState, setRiderState] = useState<RiderState>("loading");
 
   useEffect(() => {
@@ -15,26 +15,14 @@ const Page = () => {
       // Wait for Clerk to initialize
       if (!isLoaded) return;
 
-      const token = await getToken();
-
       // Not signed in → show welcome
-      if (!isSignedIn || !token) {
+      if (!isSignedIn || !userId) {
         setRiderState("not_registered");
         return;
       }
-      
 
       try {
-        const token = await getToken();
-
-        // Session not fully ready yet
-        if (!token) {
-          setRiderState("not_registered");
-          return;
-        }
-
-        const rider = await getMyProfile(token);
-
+        const rider = await getMyProfile(userId);
         setRiderState(rider.isApproved ? "approved" : "pending");
       } catch (error) {
         console.log("getMyProfile failed:", error);
@@ -43,12 +31,12 @@ const Page = () => {
     };
 
     // Small delay allows Clerk session to settle after sign-up
-     const timer = setTimeout(() => {
-       checkRider();
-     }, 1000);
+    const timer = setTimeout(() => {
+      checkRider();
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isLoaded, isSignedIn, getToken]);
+  }, [isLoaded, isSignedIn, userId]);
 
   if (!isLoaded || riderState === "loading") {
     return (

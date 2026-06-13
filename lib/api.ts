@@ -10,8 +10,19 @@ if (!BASE) {
 
 // Add to lib/api.ts
 
-export async function getMyProfile(token: string): Promise<Rider> {
-  return request<Rider>("/api/riders/me", token);
+export async function getMyProfile(clerkId: string): Promise<Rider> {
+  const res = await fetch(`${BASE}/api/riders/me?clerkId=${clerkId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? `Request failed: ${res.status}`);
+  }
+  return res.json();
 }
 
 export async function updateRiderStatus(
