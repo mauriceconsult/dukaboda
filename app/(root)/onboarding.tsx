@@ -15,10 +15,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import InputField from "@/components/InputField";
 import CustomButton from "@/components/CustomButton";
 import { registerRider } from "@/lib/api";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 type VehicleType = "motorcycle" | "bicycle" | "car";
 
