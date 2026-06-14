@@ -126,23 +126,40 @@ export default function OnboardingScreen() {
       // Stop here temporarily
       // return;
 
-    await registerRider(
-      {
-        name: name.trim(),
-        phone: formatted,
-        email: user?.primaryEmailAddress?.emailAddress ?? "",
-        vehicleType: vehicle,
-      },
-      userId,
-    );
+  console.log("=== ABOUT TO REGISTER RIDER ===");
+  console.log({
+    clerkId: userId,
+    name: name.trim(),
+    phone: formatted,
+    email: user?.primaryEmailAddress?.emailAddress ?? "",
+    vehicleType: vehicle,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    hasApiKey: !!process.env.EXPO_PUBLIC_PLATFORM_API_KEY,
+  });
 
-      router.replace("/(root)/pending");
+  const rider = await registerRider(
+    {
+      name: name.trim(),
+      phone: formatted,
+      email: user?.primaryEmailAddress?.emailAddress ?? "",
+      vehicleType: vehicle,
+    },
+    userId,
+  );
+
+  console.log("=== REGISTER SUCCESS ===");
+  console.log(rider);
+
+  router.replace("/(root)/pending");
     } catch (err: any) {
-      Alert.alert(
-        "Registration failed",
-        err.message ?? "Please try again."
-      );
-    } finally {
+  console.error("=== REGISTRATION ERROR ===");
+  console.error(err);
+
+  Alert.alert(
+    "Registration failed",
+    err?.message ?? JSON.stringify(err) ?? "Please try again."
+  );
+} finally {
       setSubmitting(false);
     }
   };

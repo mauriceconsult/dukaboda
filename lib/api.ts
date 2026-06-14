@@ -74,6 +74,7 @@ return data as T;
 
 // ── Rider registration / profile ──────────────────────────────────────────────
 
+
 export async function registerRider(
   data: {
     name: string;
@@ -94,11 +95,19 @@ export async function registerRider(
       clerkId,
     }),
   });
+  console.log("received key:", res.headers.get("x-api-key")?.substring(0, 8));
+  console.log("expected key:", process.env.PLATFORM_API_KEY?.substring(0, 8));
+  
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? `Request failed: ${res.status}`);
-  }
+if (!res.ok) {
+  const err = await res.json().catch(() => null);
+
+  throw new Error(
+    (err as { error?: string; message?: string } | null)?.error ??
+      (err as { error?: string; message?: string } | null)?.message ??
+      `Request failed: ${res.status}`,
+  );
+}
   return res.json();
 }
 
