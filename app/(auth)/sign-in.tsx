@@ -15,7 +15,7 @@ import {
 
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
-import OAuth from "@/components/OAuth";
+// import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
 
 const SignIn = () => {
@@ -95,7 +95,7 @@ const SignIn = () => {
               disabled={loading}
               className="mt-6"
             />
-            <OAuth />
+            {/* <OAuth /> */}
             <Link
               href="/sign-up"
               className="text-lg text-center text-general-200 mt-10"

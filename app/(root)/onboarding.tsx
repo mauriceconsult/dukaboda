@@ -44,7 +44,7 @@ const VEHICLES: { type: VehicleType; icon: string; label: string; description: s
 ];
 
 export default function OnboardingScreen() {
-  const { getToken, userId, isLoaded, isSignedIn } = useAuth();
+  const { userId, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
 
   const [name,        setName]        = useState(
@@ -64,102 +64,37 @@ export default function OnboardingScreen() {
       return;
     }
     if (!isLoaded || !isSignedIn || !userId) {
-      Alert.alert(
-        "Please wait",
-        "Your account is still being initialized. Try again in a moment.",
-      );
+      Alert.alert("Please wait", "Account still initializing. Try again.");
       return;
     }
 
+    // ← guard above ensures userId is string here
     try {
       setSubmitting(true);
-      const token = await getToken();
-      console.log({
-        isLoaded,
-        isSignedIn,
-        userId,
-        hasToken: !!token,
-      });
-      if (!token) throw new Error("Not authenticated");
 
-      // Format phone to E.164 if needed
       const formatted = phone.startsWith("+")
         ? phone
         : `+256${phone.replace(/^0/, "")}`;
 
-      console.log("TOKEN EXISTS:", !!token);
-      console.log("TOKEN:", token?.slice(0, 50));
-      console.log("USER ID:", userId);
-
-      // ─────────────────────────────────────────────
-      // DEBUG TOKEN ENDPOINT
-      // ─────────────────────────────────────────────
-      const debugRes = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/debug/token`,
+      const rider = await registerRider(
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.EXPO_PUBLIC_PLATFORM_API_KEY ?? "",
-            Authorization: `Bearer ${token}`,
-            
-          },
-          
-          body: JSON.stringify({
-            clerkId: userId,
-            tokenExists: !!token,
-          }),
+          name: name.trim(),
+          phone: formatted,
+          email: user?.primaryEmailAddress?.emailAddress ?? "",
+          vehicleType: vehicle,
         },
-      );
-      console.log(
-        "API KEY EXISTS:",
-        !!process.env.EXPO_PUBLIC_PLATFORM_API_KEY,
+        userId, // ← now guaranteed string
       );
 
-      const debug = await debugRes.json();
-
-      console.log("DEBUG STATUS:", debugRes.status);
-      console.log("DEBUG BODY:", debug);
-
-      Alert.alert("Debug", JSON.stringify(debug, null, 2));
-
-      // Stop here temporarily
-      // return;
-
-  console.log("=== ABOUT TO REGISTER RIDER ===");
-  console.log({
-    clerkId: userId,
-    name: name.trim(),
-    phone: formatted,
-    email: user?.primaryEmailAddress?.emailAddress ?? "",
-    vehicleType: vehicle,
-    apiUrl: process.env.EXPO_PUBLIC_API_URL,
-    hasApiKey: !!process.env.EXPO_PUBLIC_PLATFORM_API_KEY,
-  });
-
-  const rider = await registerRider(
-    {
-      name: name.trim(),
-      phone: formatted,
-      email: user?.primaryEmailAddress?.emailAddress ?? "",
-      vehicleType: vehicle,
-    },
-    userId,
-  );
-
-  console.log("=== REGISTER SUCCESS ===");
-  console.log(rider);
-
-  router.replace("/(root)/pending");
+      console.log("=== REGISTER SUCCESS ===", rider);
+      router.replace("/(root)/pending");
     } catch (err: any) {
-  console.error("=== REGISTRATION ERROR ===");
-  console.error(err);
-
-  Alert.alert(
-    "Registration failed",
-    err?.message ?? JSON.stringify(err) ?? "Please try again."
-  );
-} finally {
+      console.error("=== REGISTRATION ERROR ===", err);
+      Alert.alert(
+        "Registration failed",
+        err?.message ?? JSON.stringify(err) ?? "Please try again.",
+      );
+    } finally {
       setSubmitting(false);
     }
   };

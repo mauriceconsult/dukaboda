@@ -16,7 +16,7 @@ import {
 import { ReactNativeModal } from "react-native-modal";
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
-import OAuth from "@/components/OAuth";
+// import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
 
 const SignUp = () => {
@@ -154,7 +154,7 @@ const SignUp = () => {
               disabled={loading}
               className="mt-6"
             />
-            <OAuth />
+            {/* <OAuth /> */}
             <Link
               href="/(auth)/sign-in"
               className="text-lg text-center text-general-200 mt-10"
